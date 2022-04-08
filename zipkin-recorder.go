@@ -10,8 +10,8 @@ import (
 	otext "github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
 
-	"github.com/openzipkin-contrib/zipkin-go-opentracing/flag"
-	"github.com/openzipkin-contrib/zipkin-go-opentracing/thrift/gen-go/zipkincore"
+	"github.com/cyril1929/zipkin-go-opentracing/flag"
+	"github.com/cyril1929/zipkin-go-opentracing/thrift/gen-go/zipkincore"
 )
 
 var (
