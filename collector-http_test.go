@@ -1,6 +1,7 @@
 package zipkintracer
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -309,6 +310,7 @@ func newHTTPServer(t *testing.T, port int) *httpServer {
 	handler := http.NewServeMux()
 
 	handler.HandleFunc("/api/v1/spans", func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.Background()
 		contextType := r.Header.Get("Content-Type")
 		if contextType != "application/x-thrift" {
 			t.Fatalf(
@@ -334,7 +336,7 @@ func newHTTPServer(t *testing.T, port int) *httpServer {
 			return
 		}
 		transport := thrift.NewTBinaryProtocolTransport(buffer)
-		_, size, err := transport.ReadListBegin()
+		_, size, err := transport.ReadListBegin(ctx)
 		if err != nil {
 			t.Error(err)
 			return
@@ -342,13 +344,13 @@ func newHTTPServer(t *testing.T, port int) *httpServer {
 		var spans []*zipkincore.Span
 		for i := 0; i < size; i++ {
 			zs := &zipkincore.Span{}
-			if err = zs.Read(transport); err != nil {
+			if err = zs.Read(ctx, transport); err != nil {
 				t.Error(err)
 				return
 			}
 			spans = append(spans, zs)
 		}
-		err = transport.ReadListEnd()
+		err = transport.ReadListEnd(ctx)
 		if err != nil {
 			t.Error(err)
 			return

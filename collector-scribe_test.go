@@ -154,6 +154,7 @@ func (h *scribeHandler) Log(ctx context.Context, messages []*scribe.LogEntry) (s
 }
 
 func (h *scribeHandler) spans() []*zipkincore.Span {
+	ctx := context.Background()
 	h.RLock()
 	defer h.RUnlock()
 	spans := []*zipkincore.Span{}
@@ -170,7 +171,7 @@ func (h *scribeHandler) spans() []*zipkincore.Span {
 		}
 		transport := thrift.NewTBinaryProtocolTransport(buffer)
 		zs := &zipkincore.Span{}
-		if err := zs.Read(transport); err != nil {
+		if err := zs.Read(ctx, transport); err != nil {
 			h.t.Error(err)
 			continue
 		}

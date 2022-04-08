@@ -161,6 +161,7 @@ func testMetadata(t *testing.T, m *sarama.ProducerMessage) {
 }
 
 func deserializeSpan(t *testing.T, e sarama.Encoder) *zipkincore.Span {
+	ctx := context.Background()
 	bytes, err := e.Encode()
 	if err != nil {
 		t.Errorf("error in encoding: %v", err)
@@ -170,7 +171,7 @@ func deserializeSpan(t *testing.T, e sarama.Encoder) *zipkincore.Span {
 	_, _ = mb.Write(bytes)
 	_ = mb.Flush(context.Background())
 	pt := thrift.NewTBinaryProtocolTransport(mb)
-	err = s.Read(pt)
+	err = s.Read(ctx, pt)
 	if err != nil {
 		t.Errorf("error in decoding: %v", err)
 	}

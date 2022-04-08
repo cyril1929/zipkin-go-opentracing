@@ -1,6 +1,8 @@
 package zipkintracer
 
 import (
+	"context"
+
 	"github.com/Shopify/sarama"
 	"github.com/apache/thrift/lib/go/thrift"
 
@@ -86,9 +88,10 @@ func (c *KafkaCollector) Close() error {
 }
 
 func kafkaSerialize(s *zipkincore.Span) []byte {
+	ctx := context.Background()
 	t := thrift.NewTMemoryBuffer()
 	p := thrift.NewTBinaryProtocolTransport(t)
-	if err := s.Write(p); err != nil {
+	if err := s.Write(ctx, p); err != nil {
 		panic(err)
 	}
 	return t.Buffer.Bytes()

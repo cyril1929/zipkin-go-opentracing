@@ -129,9 +129,10 @@ func (c *ScribeCollector) Close() error {
 }
 
 func scribeSerialize(s *zipkincore.Span) string {
+	ctx := context.Background()
 	t := thrift.NewTMemoryBuffer()
 	p := thrift.NewTBinaryProtocolTransport(t)
-	if err := s.Write(p); err != nil {
+	if err := s.Write(ctx, p); err != nil {
 		panic(err)
 	}
 	return base64.StdEncoding.EncodeToString(t.Buffer.Bytes())
@@ -227,7 +228,7 @@ func scribeClientFactory(addr string, timeout time.Duration) func() (scribe.Scri
 		if err != nil {
 			return nil, err
 		}
-		socket := thrift.NewTSocketFromAddrTimeout(a, timeout)
+		socket := thrift.NewTSocketFromAddrTimeout(a, timeout, timeout)
 		transport := thrift.NewTFramedTransport(socket)
 		if err := transport.Open(); err != nil {
 			_ = socket.Close()

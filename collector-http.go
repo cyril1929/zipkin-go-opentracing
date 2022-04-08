@@ -2,6 +2,7 @@ package zipkintracer
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"time"
 
@@ -132,17 +133,18 @@ func (c *HTTPCollector) Close() error {
 }
 
 func httpSerialize(spans []*zipkincore.Span) *bytes.Buffer {
+	ctx := context.Background()
 	t := thrift.NewTMemoryBuffer()
 	p := thrift.NewTBinaryProtocolTransport(t)
-	if err := p.WriteListBegin(thrift.STRUCT, len(spans)); err != nil {
+	if err := p.WriteListBegin(ctx, thrift.STRUCT, len(spans)); err != nil {
 		panic(err)
 	}
 	for _, s := range spans {
-		if err := s.Write(p); err != nil {
+		if err := s.Write(ctx, p); err != nil {
 			panic(err)
 		}
 	}
-	if err := p.WriteListEnd(); err != nil {
+	if err := p.WriteListEnd(ctx); err != nil {
 		panic(err)
 	}
 	return t.Buffer
